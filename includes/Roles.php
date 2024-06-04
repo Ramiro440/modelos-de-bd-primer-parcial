@@ -1,16 +1,25 @@
 <?php
 $post = json_decode(file_get_contents('php://input'), true);
 require_once '_db.php';
+
 if ($post) {
   switch ($post['action']) {
     case 'insert':
       $roles = new Roles();
       $roles->insertData($post);
       break;
-      case 'delete':
-        $events = new Roles();
-        $events->deleteData($post);
-        break;
+    case 'delete':
+      $roles = new Roles();
+      $roles->deleteData($post);
+      break;
+    case 'selectOne':
+      $roles = new Roles();
+      $roles->getOneData($post);
+      break;
+    case 'update':
+      $roles = new Roles();
+      $roles->updateData($post);
+      break;
   }
 }
 class Roles
@@ -41,22 +50,30 @@ class Roles
     }
     echo json_encode($response);
   }
+
+  public function deleteData($id)
   {
-    $id = $data['id'];
     global $mysqli;
-    $query = "DELETE FROM roles where id =  $id";
+    $id = (int) $id;
+    $query = "DELETE FROM roles WHERE id = $id";
+    $mysqli->query($query);
     $response = [
-      "message" => "No se pudo eliminar el registro en la base de datos",
+      "message" => "No se pudo eliminar el registro",
       "status" => 0
     ];
-
-    if ($mysqli->query($query)) {
+    if ($mysqli->affected_rows > 0) {
       $response = [
-        "message" => "Se ha eliminado el registro en la base de datos",
+        "message" => "Se eliminó correctamente el Cliente",
         "status" => 1
       ];
     }
     echo json_encode($response);
   }
 }
+
+if ($post && $post['action'] == 'insert') {
+  $roles = new Roles();
+  $roles->insertData($post);
+}
+
 
